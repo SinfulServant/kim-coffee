@@ -1,11 +1,11 @@
 {
-  "name": "kim-coffee-backend",
+  "name": "kim-coffee",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "backend/index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "node backend/index.js",
+    "dev": "nodemon backend/index.js",
     "deploy": "node backend/index.js"
   },
   "author": "",
