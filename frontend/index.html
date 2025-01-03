@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue App</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="styles/zero.css">
+    <link rel="stylesheet" type="text/css" href="styles/base.css">
+    <link rel="stylesheet" type="text/css" href="styles/main.css">
+</head>
+<body>
+<script src="utiles/send-request.js"></script>
+<script src="utiles/env.js"></script>
+<script src="utiles/routing-helper.js"></script>
+<script src="utiles/generate-qr-code.js"></script>
+
+<div id="app">
+    <div class="main-container">
+        <header>
+            <h1 v-if="state === 'certificate'">Kim Coffee</h1>
+            <nav>
+                <p @click="changeState('all-certificates')">Всі сертифікати</p>
+                <p @click="changeState('create')">Створити сертифікат</p>
+            </nav>
+        </header>
+        <div class="main-content">
+            <div class="certificates" v-if="state === 'all-certificates'">
+                <h3>Активні сертифікати</h3>
+                <div class="certificates__certificates">
+                    <div v-if="!allCertificates" class="loader"></div>
+                    <div v-else class="certificates__certificate" v-for="certificate of allCertificates">
+                        <div class="certificates__certificate-description">
+                            <h4>{{ 'Номер сертифікату: ' + certificate.id }}</h4>
+                            <p>Сума: {{ certificate.amount }}</p>
+                        </div>
+                        <div class="certificates__certificate-actions">
+                            <button @click="changeState('update', certificate.id)"><img src="assets/edit.svg" alt="Icon" width="24" height="24"></button>
+                            <button @click="deleteCertificate(certificate.id)" class="button-delete"><img src="assets/delete.svg" alt="Icon" width="24"
+                                                               height="24"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="certificate" v-else>
+                <h3 class="certificate__title">{{ certificateTitle }}</h3>
+                <div v-if="state === 'certificate' || state === 'update'">
+                    <div v-if="isLoading" class="loader"></div>
+                    <canvas :class="isLoading ? 'certificate__canvas--hidden' : ''" id="qrcode"></canvas>
+                </div>
+
+                <div class="certificate__create" v-if="state === 'create'">
+                    <div class="certificate__canvas-wrapper">
+                        <div v-if="isLoading" class="loader"></div>
+                        <canvas :class="isLoading ? 'certificate__canvas--hidden' : ''" id="qrcode"></canvas>
+                    </div>
+                    <div class="certificate__create-action">
+                        <input class="certificate__amount-input" v-model="amountInput" type="text"
+                               placeholder="Введить баланс">
+                        <button @click="getQrCodeUrl" :disabled="!amountInput.length">Сгенерувати QR-код</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var {createApp, ref, onMounted, computed} = Vue
+
+    createApp({
+        setup() {
+            var deleteCertificate = DeleteCertificate;
+
+            var isLoading = ref(false)
+            var state = ref(getHrefInfo().route)
+            var allCertificates = ref(null)
+            var currentCertificate = ref(null)
+            var amountInput = ref('')
+            var certificateTitle = computed(() => state.value === State.Create ? 'Створити новий сертифікат' : 'Ваш сертифікат')
+
+            // TODO якось перенести у send-request
+            var getQrCodeUrl = function () {
+                isLoading.value = true;
+                sendRequest('POST', createCertificateUrl, {
+                    amount: +amountInput.value,
+                    password: 'e2b12f46-0a12-41a7-a4cc-cdd4cf27606a'
+                }).then((res) => {
+                    isLoading.value = false;
+                    amountInput.value = '';
+                    certificateUrl(res.id)
+                    generateQrCode(getCertificateUrl)
+                })
+            }
+
+            var changeState = function (newState, id) {
+                var baseUrl = getHrefInfo().baseUrl
+                window.history.pushState({}, '', `${baseUrl}/${newState}${id ? `?id=${id}` : ''}`)
+                state.value = newState
+
+                switch (newState) {
+                    case State.AllCertificates:
+                        GetAllCertificates(allCertificates);
+                        break;
+                    case State.Update:
+                        generateQrCode('url') // TODO доробити
+                        break;
+                }
+            }
+
+            onMounted(() => {
+                var { route, id } = getHrefInfo();
+                state.value = route;
+
+                // Отримуємо необхідні дані
+                if (state.value === State.AllCertificates) {
+                    GetAllCertificates(allCertificates)
+                } else if (state.value === State.Update || state.value === State.Certificate) {
+                    GetCertificate(currentCertificate)
+                }
+
+                // Генеруємо QR-код якщо це сторінка QR-коду
+                if (state.value === State.Certificate || state.value === State.Update) {
+                    generateQrCode(getCertificateUrl + id)
+                }
+            })
+
+
+            return {
+                isLoading,
+                state,
+                amountInput,
+                certificateTitle,
+                getQrCodeUrl,
+                allCertificates,
+                deleteCertificate,
+                changeState,
+            }
+        }
+
+    }).mount('#app')
+</script>
+</body>
+</html>
