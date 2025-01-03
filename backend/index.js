@@ -56,8 +56,7 @@ app.post('/certificate/create', async (req, res) => {
 
         const result = await pool.query(
             `INSERT INTO certificate (amount)
-             VALUES (${amount});
-            `,
+             VALUES (${amount}) RETURNING *`,
         );
         res.json(result.rows[0]);
     } catch (err) {
