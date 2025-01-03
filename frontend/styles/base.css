@@ -1,0 +1,94 @@
+input[type="text"] {
+    width: 300px;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+input[type="text"]:focus {
+    border-color: #007bff;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
+}
+
+input[type="text"]::placeholder {
+    color: #aaa;
+}
+
+input[type="text"]:hover {
+    border-color: #0056b3;
+}
+
+/* Загальні стилі для кнопок */
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 5px;
+    border: 2px solid transparent;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+/* Стиль кнопки при наведені */
+button:hover {
+    background-color: #45a049;        /* Темніший зелений колір при наведенні */
+    border-color: #388e3c;             /* Зміна кольору бордера */
+}
+
+/* Стиль кнопки при натисканні */
+button:active {
+    background-color: #367c39;        /* Темніший зелений при натисканні */
+    transform: scale(0.98);            /* Трохи зменшити розмір кнопки */
+}
+
+/* Стиль кнопки при фокусі */
+button:focus {
+    outline: 2px solid #388e3c;        /* Додати контур при фокусі */
+}
+
+button.button-delete {
+    background: #da4747;
+}
+
+button.button-delete:focus {
+    outline: 2px solid #ff5c5c
+}
+
+button.button-delete:active {
+    background: #fb8787;
+}
+
+/* Для кнопки, що є деактивованою */
+button:disabled {
+    background-color: #d3d3d3;         /* Світло-сірий фон для деактивованої кнопки */
+    border-color: #a9a9a9;             /* Світло-сірий бордер */
+    color: #7f7f7f;                    /* Світло-сірий текст */
+    cursor: not-allowed;               /* Курсор у вигляді заборони */
+}
+
+
+/*  */
+.loader {
+    border: 4px solid #f3f3f3; /* Світлий колір основи */
+    border-top: 4px solid #3498db; /* Основний колір анімації */
+    border-radius: 50%; /* Робить форму кола */
+    width: 40px; /* Ширина */
+    height: 40px; /* Висота */
+    animation: spin 1s linear infinite; /* Анімація обертання */
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg); /* Початковий стан */
+    }
+    100% {
+        transform: rotate(360deg); /* Кінець обертання */
+    }
+}
