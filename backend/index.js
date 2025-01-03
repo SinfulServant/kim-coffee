@@ -12,6 +12,14 @@ app.use(express.json());
 // Валідуємо запити
 app.use(validateRequest)
 
+// Middleware для відключення CORS
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');  // Дозволяємо доступ з будь-якого домену
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');  // Дозволяємо ці методи
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');  // Дозволяємо ці заголовки
+    next();  // Продовжуємо обробку запиту
+});
+
 // Маршрут для отримання всіх сертифікатів
 app.get('/certificate/all', async (req, res) => {
     try {
