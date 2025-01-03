@@ -1,6 +1,7 @@
 const express = require('express');
 const pool = require('./db'); // Імпортуємо підключення до бази
 const validateRequest = require('./validate')
+
 const app = express();
 
 const PORT = process.env.PORT;
