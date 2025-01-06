@@ -6,6 +6,9 @@
     <title>Vue App</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="frontend/styles/zero.css">
     <link rel="stylesheet" type="text/css" href="frontend/styles/base.css">
     <link rel="stylesheet" type="text/css" href="frontend/styles/main.css">
@@ -28,9 +31,7 @@
         <div class="certificate" v-if="state === routeState.Certificate">
             <div v-if="isLoading" class="loader"></div>
             <div class="certificate__certificate" :class="isLoading ? 'certificate__canvas--hidden' : ''">
-                <p class="certificate__description">На рахунку вашого сертифіката знаходиться {{currentCertificate?.amount}} гривень. <br>
-                    Дякуємо, що обираєте наc :)
-                </p>
+                <p class="certificate__description">На рахунку вашого сертифіката знаходиться </br>{{currentCertificate?.amount}} гривень :)</p>
                 <canvas id="qrcode"></canvas>
                 <button @click="changeState(routeState.Update, currentCertificate.id)" v-if="isAccess">Редагувати сертифікат</button>
             </div>

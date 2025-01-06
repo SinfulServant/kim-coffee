@@ -29,7 +29,7 @@
 }
 
 .main-container--certificate-showing {
-    background-image: url("./../assets/certificate.jpg");
+    background-image: url("./../assets/certificate.webp");
     background-repeat: no-repeat;
     background-size: cover;
 }
@@ -215,12 +215,15 @@ input.certificate__amount-input {
     justify-content: space-between;
     align-items: center;
     height: 100%;
-    padding-bottom: 15px;
+    padding-bottom: 40px;
 }
 
 .certificate__description {
+    font-family: "Lobster", serif;
+    font-size: 17px;
     text-align: center;
-    padding: 5px;
+    padding-top: 30px;
+    color: beige;
 }
 
 .certificate #qrcode {
