@@ -22,9 +22,10 @@ var sendRequest = (method, url, data = null, repeatReqCallback = () => {}) => {
         .then(async (response) => {
             const responseBody = await response.json().catch(() => ({})); // Уникаємо помилок, якщо JSON порожній
             if (!response.ok) {
-                if (response.status === 401
+                if ((response.status === 401 && responseBody.message !== 'Access token is missing')
                     || responseBody.message === 'Invalid or expired refresh token'
-                    || responseBody.message === 'Refresh token is missing') {
+                    || responseBody.message === 'Refresh token is missing'
+                ) {
                     ChangeState(Routes.Login);
                 } else if (response.status === 403) {
                     RefreshToken(repeatReqCallback);
