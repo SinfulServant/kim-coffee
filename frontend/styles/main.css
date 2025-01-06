@@ -65,6 +65,14 @@ nav p:hover {
     padding: 20px 0;
 }
 
+/* Login */
+.login__wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
 
 /* All certificates */
 .certificates {
@@ -121,14 +129,20 @@ nav p:hover {
     color: white;
 }
 
-/* One certificate */
-.certificate {
+/* Update certificate */
+.certificate-update {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
     height: 100%;
     padding: 20px;
 }
 
 .certificate__canvas-wrapper {
     display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
     height: 300px;
 }
@@ -153,14 +167,13 @@ nav p:hover {
     }
 }
 
-
 .certificate__create-action {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
 }
 
-.certificate__canvas--hidden {
+.certificate__canvas--hidden, .element-hidden {
     position: absolute;
     visibility: hidden;
     height: 0;
@@ -181,3 +194,17 @@ input.certificate__amount-input {
     }
 }
 
+/* Public certificate */
+.certificate {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100%;
+    padding: 20px;
+}
+
+.certificate__description {
+    text-align: center;
+    padding: 20px;
+}

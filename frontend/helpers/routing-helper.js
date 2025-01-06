@@ -1,13 +1,15 @@
-var State = {
+var Routes = {
     'AllCertificates': 'all-certificates',
     'Certificate': 'certificate',
     'Create': 'create',
     'Update': 'update',
+    'Login': 'login',
+    'NotFound': 'not-found'
 }
 
 var getHrefInfo = function () {
     var hrefArray = window.location.href.split('/');
-    var lastPart = hrefArray.pop();
+    var lastPart = isMyPath(hrefArray.at(-1)) ? hrefArray.pop() : '';
     var baseUrl = hrefArray.join('/')
 
     // Розділяємо шлях і параметри
@@ -26,3 +28,11 @@ var getHrefInfo = function () {
         id
     };
 };
+
+var isMyPath = (path) => {
+    return path.split('?')[0] === Routes.Certificate
+        || path === Routes.Login
+        || path === Routes.AllCertificates
+        || path === Routes.Create
+        || path.split('?')[0] === Routes.Update;
+}

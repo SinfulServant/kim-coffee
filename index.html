@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue App</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="frontend/styles/zero.css">
+    <link rel="stylesheet" type="text/css" href="frontend/styles/base.css">
+    <link rel="stylesheet" type="text/css" href="frontend/styles/main.css">
+</head>
+<body>
+<script src="frontend/helpers/routing-helper.js"></script>
+<script src="frontend/helpers/env.js"></script>
+<script src="frontend/helpers/generate-qr-code.js"></script>
+<script src="frontend/helpers/send-request.js"></script>
+<script>var ChangeState; var IsAccess;</script>
+<div id="app">
+    <div class="main-container">
+        <header>
+            <h1 v-if="state === routeState.Certificate">Kim Coffee</h1>
+            <nav v-else>
+                <p @click="changeState(routeState.AllCertificates)">Всі сертифікати</p>
+                <p @click="changeState(routeState.Create)">Створити сертифікат</p>
+            </nav>
+        </header>
+
+        <div class="main-content">
+            <div class="login__wrapper" v-if="state === routeState.Login">
+                <p>Введіть пароль</p>
+                <input type="text" v-model="password">
+                <button @click="doLogin">Авторизуватися</button>
+            </div>
+            <div v-else>
+                <div class="certificates" v-if="state === routeState.AllCertificates">
+                    <h3>Активні сертифікати</h3>
+                    <div class="certificates__certificates">
+                        <div v-if="!allCertificates" class="loader"></div>
+                        <div v-else class="certificates__certificate" v-for="certificate of allCertificates">
+                            <div class="certificates__certificate-description">
+                                <h4>{{ 'Номер сертифікату: ' + certificate.id }}</h4>
+                                <p>Сума: {{ certificate.amount }}</p>
+                            </div>
+                            <div class="certificates__certificate-actions">
+                                <button @click="changeState(routeState.Update, certificate.id)">
+                                    <img src="frontend/assets/edit.svg" alt="Icon" width="24" height="24">
+                                </button>
+                                <button @click="deleteCertificate(certificate.id)" class="button-delete">
+                                    <img src="frontend/assets/delete.svg" alt="Icon" width="24" height="24">
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="certificate" v-if="state === routeState.Certificate">
+                    <div v-if="isLoading" class="loader"></div>
+                    <div class="certificate__canvas-wrapper" :class="isLoading ? 'certificate__canvas--hidden' : ''">
+                        <canvas id="qrcode"></canvas>
+                        <p class="certificate__description">На рахунку вашого сертифіката знаходиться {{currentCertificate?.amount}} гривень. <br>
+                            Дякуємо, що обираєте наc :)
+                        </p>
+                        <button @click="changeState(routeState.Update, currentCertificate.id)" v-if="isAccess">Редагувати сертифікат</button>
+                    </div>
+                </div>
+
+                <div class="certificate-update" v-if="state !== routeState.Certificate && state !== routeState.AllCertificates">
+                    <div v-if="!currentCertificate?.id && state !== routeState.Create" class="loader"></div>
+                    <div :class="currentCertificate?.id ? '' : 'element-hidden'">
+                        <h3 class="certificate__title">{{ certificateTitle }}</h3>
+                        <div v-if="state === routeState.Update">
+                            <div class="certificate__canvas-wrapper">
+                                <canvas :class="isLoading ? 'certificate__canvas--hidden' : ''" id="qrcode"></canvas>
+                            </div>
+                            <div class="certificate__create-action">
+                                <p>Поточний баланс сертифіката</p>
+                                <input class="certificate__amount-input" v-model="amountInput" type="text"
+                                       placeholder="Введить баланс (грн)">
+                                <button @click="updateCertificate()">Змінити баланс сертифікату</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="certificate__create" v-if="state === routeState.Create">
+                        <div class="certificate__canvas-wrapper">
+                            <div v-if="isLoading" class="loader"></div>
+                            <canvas :class="isLoading ? 'certificate__canvas--hidden' : ''" id="qrcode"></canvas>
+                        </div>
+                        <div class="certificate__create-action">
+                            <input class="certificate__amount-input" v-model="amountInput" type="text"
+                                   placeholder="Введить баланс (грн)">
+                            <button @click="createCertificate()" :disabled="!amountInput.length">Сгенерувати QR-код
+                            </button>
+                        </div>
+                    </div>
+
+                    <div v-if="state === routeState.NotFound">
+                        Error 404
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var {createApp, ref, onMounted, computed} = Vue
+
+    createApp({
+        setup() {
+            var routeState = ref(Routes);
+            var deleteCertificate = (id) => DeleteCertificate(id, allCertificates);
+            var createCertificate = () => CreateCertificate({isLoading, amountInput});
+            var updateCertificate = () => UpdateCertificate(currentCertificate.value.id, amountInput)
+            var doLogin = () => DoLogin(password.value)
+
+            var isLoading = ref(false);
+            var state = ref(getHrefInfo().route);
+            var allCertificates = ref(null);
+            var currentCertificate = ref(null);
+            var amountInput = ref('');
+            var password = ref('');
+            var isAccess = ref(false);
+            var certificateTitle = computed(() => state.value === Routes.Create ? 'Створити новий сертифікат' : 'Номер сертифікату: ' + currentCertificate?.value?.id);
+
+            var changeState = function (newState, id) {
+                // зануляємо поточні значення
+                currentCertificate.value = null;
+                amountInput.value = '';
+
+                var baseUrl = getHrefInfo().baseUrl
+                var newUrl = `${baseUrl}/${newState}${id ? `?id=${id}` : ''}`
+
+                if (!isAccess.value && state.value !== Routes.Certificate) {
+                    newState = Routes.NotFound;
+                }
+
+                window.history.pushState({}, '', newUrl)
+                state.value = newState
+
+                switch (newState) {
+                    case Routes.AllCertificates:
+                        GetAllCertificates(allCertificates);
+                        break;
+                    case Routes.Update:
+                        isLoading.value = true
+                        GetCertificate(currentCertificate, amountInput, () => {
+                            isLoading.value = false;
+                        })
+                        generateQrCode(id);
+                        break;
+                    case Routes.Certificate:
+                        isLoading.value = true
+                        GetCertificate(currentCertificate, amountInput, () => {
+                            isLoading.value = false;
+                        });
+                        break;
+                    case Routes.NotFound:
+                        break;
+                }
+            }
+
+            onMounted(() => {
+                // setting global variables
+                ChangeState = changeState;
+                isAccess.value = !!localStorage.getItem('accessToken')
+                IsAccess = isAccess;
+
+                // local variables
+                state.value = getHrefInfo().route;
+
+                // Отримуємо необхідні дані
+                if (state.value === Routes.AllCertificates) {
+                    GetAllCertificates(allCertificates)
+                } else if (state.value === Routes.Update || state.value === Routes.Certificate) {
+                    isLoading.value = true;
+                    GetCertificate(currentCertificate, amountInput, () => {
+                        isLoading.value = false;
+                        generateQrCode(currentCertificate.value.id);
+                    })
+                }
+            })
+
+            return {
+                isLoading,
+                routeState,
+                state,
+                amountInput,
+                certificateTitle,
+                createCertificate,
+                allCertificates,
+                deleteCertificate,
+                changeState,
+                currentCertificate,
+                updateCertificate,
+                password,
+                doLogin,
+                isAccess,
+            }
+        }
+
+    }).mount('#app')
+</script>
+</body>
+</html>
