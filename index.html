@@ -17,16 +17,26 @@
 <script src="frontend/helpers/send-request.js"></script>
 <script>var ChangeState; var IsAccess;</script>
 <div id="app">
-    <div class="main-container">
-        <header>
-            <h1 v-if="state === routeState.Certificate">Kim Coffee</h1>
-            <nav v-else>
+    <div class="main-container" :class="state === routeState.Certificate ? 'main-container--certificate-showing' : ''">
+        <header v-if="state !== routeState.Certificate">
+            <nav>
                 <p @click="changeState(routeState.AllCertificates)">Всі сертифікати</p>
                 <p @click="changeState(routeState.Create)">Створити сертифікат</p>
             </nav>
         </header>
 
-        <div class="main-content">
+        <div class="certificate" v-if="state === routeState.Certificate">
+            <div v-if="isLoading" class="loader"></div>
+            <div class="certificate__certificate" :class="isLoading ? 'certificate__canvas--hidden' : ''">
+                <p class="certificate__description">На рахунку вашого сертифіката знаходиться {{currentCertificate?.amount}} гривень. <br>
+                    Дякуємо, що обираєте наc :)
+                </p>
+                <canvas id="qrcode"></canvas>
+                <button @click="changeState(routeState.Update, currentCertificate.id)" v-if="isAccess">Редагувати сертифікат</button>
+            </div>
+        </div>
+
+        <div class="main-content" v-if="state !== routeState.Certificate">
             <div class="login__wrapper" v-if="state === routeState.Login">
                 <p>Введіть пароль</p>
                 <input type="text" v-model="password">
@@ -51,17 +61,6 @@
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="certificate" v-if="state === routeState.Certificate">
-                    <div v-if="isLoading" class="loader"></div>
-                    <div class="certificate__canvas-wrapper" :class="isLoading ? 'certificate__canvas--hidden' : ''">
-                        <canvas id="qrcode"></canvas>
-                        <p class="certificate__description">На рахунку вашого сертифіката знаходиться {{currentCertificate?.amount}} гривень. <br>
-                            Дякуємо, що обираєте наc :)
-                        </p>
-                        <button @click="changeState(routeState.Update, currentCertificate.id)" v-if="isAccess">Редагувати сертифікат</button>
                     </div>
                 </div>
 

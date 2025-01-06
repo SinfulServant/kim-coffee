@@ -28,6 +28,12 @@
     }
 }
 
+.main-container--certificate-showing {
+    background-image: url("./../assets/certificate.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
 header {
     display: flex;
     justify-content: space-between;
@@ -201,10 +207,23 @@ input.certificate__amount-input {
     align-items: center;
     flex-direction: column;
     height: 100%;
-    padding: 20px;
+}
+
+.certificate__certificate {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    padding-bottom: 15px;
 }
 
 .certificate__description {
     text-align: center;
-    padding: 20px;
+    padding: 5px;
+}
+
+.certificate #qrcode {
+    border-radius: 15px;
+    box-shadow: 5px 4px 30px rgba(0, 0, 0, 0.5);
 }
