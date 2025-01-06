@@ -19,7 +19,7 @@ function generateRefreshToken() {
 const cookieOptions = {
     httpOnly: true, // Робить кукі недоступними для JS
     secure: NODE_ENV === 'production', // Тільки HTTPS
-    sameSite: 'Lax', // Захист від CSRF // TODO
+    sameSite: 'strict', // Захист від CSRF
     maxAge: REFRESH_AGE,
 }
 
