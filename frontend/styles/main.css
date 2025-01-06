@@ -31,6 +31,7 @@
 .main-container--certificate-showing {
     background-image: url("./../assets/certificate.webp");
     background-repeat: no-repeat;
+    background-position: center;
     background-size: cover;
 }
 
