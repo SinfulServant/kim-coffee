@@ -85,14 +85,21 @@ app.post('/certificate/create', authenticateAccessToken, async (req, res) => {
 // Маршрут для оновлення сертифікату
 app.post('/certificate/update/:id', authenticateAccessToken, async (req, res) => {
     try {
-        const id = req.params.id
+        const id = req.params.id;
         const amount = req.body.amount;
 
         const result = await pool.query(
             `UPDATE certificate
-             SET amount = ${amount}
-             WHERE id = ${id} RETURNING *`,
+             SET amount = $2
+             WHERE id = $1
+             RETURNING *`,
+            [id, amount]
         );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ message: 'Certificate not found' });
+        }
+
         res.json(result.rows[0]);
     } catch (err) {
         console.error(err.message);
