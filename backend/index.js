@@ -1,27 +1,40 @@
+// npm imports
 const express = require('express');
-const pool = require('./db'); // Імпортуємо підключення до бази
-const validateRequest = require('./validate')
+const cookieParser = require('cookie-parser');
+const cors = require('cors')
+
+// local imports
+const { login, refresh } = require("./endpoints/auth-endpoints");
+const pool = require('./helpers/db');
+const validateRequest = require('./helpers/validate')
+const limiter = require("./helpers/limiter");
+const authenticateAccessToken = require("./helpers/auth-middleware");
+const corsConfig = require("./helpers/cors.config");
+
+const PORT = process.env.PORT;
 
 const app = express();
 
-const PORT = process.env.PORT;
+app.use(limiter);
 
 // Middleware для обробки JSON-запитів
 app.use(express.json());
 
-// Валідуємо запити
-app.use(validateRequest)
+app.use(cookieParser());
 
-// Middleware для відключення CORS
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');  // Дозволяємо доступ з будь-якого домену
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');  // Дозволяємо ці методи
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');  // Дозволяємо ці заголовки
-    next();  // Продовжуємо обробку запиту
-});
+// Cors settings
+app.use(cors(corsConfig));
+app.options('*', cors(corsConfig));
+
+// Валідуємо деякі POST запити
+app.use(validateRequest);
+
+// Ендпоінти автентифікації
+app.post('/login', login);
+app.post('/refresh', refresh);
 
 // Маршрут для отримання всіх сертифікатів
-app.get('/certificate/all', async (req, res) => {
+app.get('/certificate/all', authenticateAccessToken, async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM certificate');
         res.json(result.rows);
@@ -50,7 +63,9 @@ app.get('/certificate/:id', async (req, res) => {
 });
 
 // Маршрут для створення нового сертифікату
-app.post('/certificate/create', async (req, res) => {
+app.post('/certificate/create', authenticateAccessToken, async (req, res) => {
+    console.log('Create endpoint')
+
     try {
         const amount = req.body.amount;
 
@@ -66,7 +81,7 @@ app.post('/certificate/create', async (req, res) => {
 });
 
 // Маршрут для оновлення сертифікату
-app.post('/certificate/update/:id', async (req, res) => {
+app.post('/certificate/update/:id', authenticateAccessToken, async (req, res) => {
     try {
         const id = req.params.id
         const amount = req.body.amount;
@@ -74,8 +89,7 @@ app.post('/certificate/update/:id', async (req, res) => {
         const result = await pool.query(
             `UPDATE certificate
              SET amount = ${amount}
-             WHERE id = ${id};
-            `,
+             WHERE id = ${id} RETURNING *`,
         );
         res.json(result.rows[0]);
     } catch (err) {
@@ -85,7 +99,7 @@ app.post('/certificate/update/:id', async (req, res) => {
 });
 
 // Маршрут для видалення запису
-app.delete('/certificate/delete/:id', async (req, res) => {
+app.delete('/certificate/delete/:id', authenticateAccessToken, async (req, res) => {
     try {
         const { id } = req.params;
 
