@@ -52,25 +52,55 @@ const refresh = async (req, res) => {
     }
 
     // Верифікація рефреш токена
-    jwt.verify(refreshToken, REFRESH_SECRET_KEY, async (err, decoded) => {
-        // TODO додати перевірку у базі
+    jwt.verify(refreshToken, REFRESH_SECRET_KEY, async (err) => {
         if (err) {
             return res.status(403).json({ message: 'Invalid or expired refresh token' });
         }
 
-        const newAccessToken = generateAccessToken();
-        const newRefreshToken = generateRefreshToken();
+        try {
+            const result = await pool.query(
+                'SELECT * FROM refresh_tokens WHERE token = $1 AND expires_at > NOW()',
+                [refreshToken]
+            );
 
-        const expiresAt = new Date(Date.now() + REFRESH_AGE);
-        await pool.query(
-            'UPDATE refresh_tokens SET token = $1, expires_at = $2 WHERE token = $3',
-            [newRefreshToken, expiresAt, refreshToken]
-        );
+            if (result.rows.length === 0) {
+                return res.status(403).json({ message: 'Refresh token not found or expired in database' });
+            }
 
-        res.cookie('refreshToken', newRefreshToken, cookieOptions)
-            .json({ accessToken: newAccessToken });
+            const newAccessToken = generateAccessToken();
+            const newRefreshToken = generateRefreshToken();
+
+            const expiresAt = new Date(Date.now() + REFRESH_AGE);
+            await pool.query(
+                'UPDATE refresh_tokens SET token = $1, expires_at = $2 WHERE token = $3',
+                [newRefreshToken, expiresAt, refreshToken]
+            );
+
+            res.cookie('refreshToken', newRefreshToken, cookieOptions)
+                .json({ accessToken: newAccessToken });
+        } catch (error) {
+            console.error('Database error: ', dbError);
+            return res.status(500).json({ message: 'Database error occurred' });
+        }
     });
 }
+
+const deleteExpiredTokens = async () => {
+    try {
+        const result = await pool.query(
+            'DELETE FROM refresh_tokens WHERE expires_at < NOW()'
+        );
+        console.log(`${result.rowCount} expired tokens deleted`);
+    } catch (err) {
+        console.error('Error deleting expired tokens:', err.message);
+    }
+};
+
+setInterval(() => {
+    console.log('Running daily expired token cleanup...');
+    deleteExpiredTokens();
+}, 86400000); // 24 години
+
 
 module.exports = {
     login,

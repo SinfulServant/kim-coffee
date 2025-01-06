@@ -1,7 +1,7 @@
 // npm imports
 const express = require('express');
 const cookieParser = require('cookie-parser');
-const cors = require('cors')
+const cors = require('cors');
 
 // local imports
 const { login, refresh } = require("./endpoints/auth-endpoints");
@@ -64,14 +64,16 @@ app.get('/certificate/:id', async (req, res) => {
 
 // Маршрут для створення нового сертифікату
 app.post('/certificate/create', authenticateAccessToken, async (req, res) => {
-    console.log('Create endpoint')
-
     try {
+        const nanoid = (await import('nanoid')).nanoid;
+
         const amount = req.body.amount;
+        const id = nanoid(10);
 
         const result = await pool.query(
-            `INSERT INTO certificate (amount)
-             VALUES (${amount}) RETURNING *`,
+            `INSERT INTO certificate (id, amount)
+             VALUES ($1, $2) RETURNING *`,
+            [id, amount]
         );
         res.json(result.rows[0]);
     } catch (err) {
