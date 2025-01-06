@@ -41,6 +41,7 @@ var sendRequest = (method, url, data = null, repeatReqCallback = () => {}) => {
 var DoLogin = function (password) {
     sendRequest('POST', loginUrl, { password }).then((res) => {
         if (res) {
+            IsAccess.value = res.accessToken;
             localStorage.setItem('accessToken', res.accessToken)
             ChangeState(Routes.AllCertificates)
         }

@@ -132,7 +132,7 @@
                 var baseUrl = getHrefInfo().baseUrl
                 var newUrl = `${baseUrl}/${newState}${id ? `?id=${id}` : ''}`
 
-                if (!isAccess.value && state.value !== Routes.Certificate) {
+                if (!isAccess.value && (state.value !== Routes.Certificate || state.value !== Routes.Login)) {
                     newState = Routes.NotFound;
                 }
 
