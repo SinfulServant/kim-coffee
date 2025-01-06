@@ -1,6 +1,6 @@
 var baseBackendUrl =
-    // 'https://kim-coffee-e633e5068a92.herokuapp.com'
-    'http://localhost:3000'
+    'https://kim-coffee-e633e5068a92.herokuapp.com'
+    // 'http://localhost:3000'
 
 var loginUrl = `${baseBackendUrl}/login`
 var refreshTokenUrl = `${baseBackendUrl}/refresh`
