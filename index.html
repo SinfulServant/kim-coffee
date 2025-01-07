@@ -50,21 +50,24 @@
             </div>
             <div v-else>
                 <div class="certificates" v-if="state === routeState.AllCertificates">
-                    <h3>Активні сертифікати</h3>
-                    <div class="certificates__certificates">
-                        <div v-if="isLoading" class="loader"></div>
-                        <div v-else class="certificates__certificate" v-for="certificate of allCertificates">
-                            <div class="certificates__certificate-description">
-                                <h4>{{ 'Номер сертифікату: ' + certificate.id }}</h4>
-                                <p>Сума: {{ certificate.amount }}</p>
-                            </div>
-                            <div class="certificates__certificate-actions">
-                                <button @click="changeState(routeState.Update, certificate.id)">
-                                    <img src="frontend/assets/edit.svg" alt="Icon" width="24" height="24">
-                                </button>
-                                <button @click="deleteCertificate(certificate.id)" class="button-delete">
-                                    <img src="frontend/assets/delete.svg" alt="Icon" width="24" height="24">
-                                </button>
+                    <div v-if="isLoading" class="loader"></div>
+                    <div>
+                        <h3>Активні сертифікати</h3>
+                        <div class="certificates__certificates">
+                            <div v-if="isLoading" class="loader"></div>
+                            <div v-else class="certificates__certificate" v-for="certificate of allCertificates">
+                                <div class="certificates__certificate-description">
+                                    <h4>{{'Код сертифікату: ' + certificate.id }}</h4>
+                                    <p>Сума: {{ certificate.amount }}</p>
+                                </div>
+                                <div class="certificates__certificate-actions">
+                                    <button @click="changeState(routeState.Update, certificate.id)">
+                                        <img src="frontend/assets/edit.svg" alt="Icon" width="24" height="24">
+                                    </button>
+                                    <button @click="deleteCertificate(certificate.id)" class="button-delete">
+                                        <img src="frontend/assets/delete.svg" alt="Icon" width="24" height="24">
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -73,7 +76,7 @@
                 <div class="certificate-update" v-if="state === routeState.Update">
                     <div v-if="isLoading" class="loader"></div>
                     <div :class="currentCertificate?.id ? '' : 'element-hidden'">
-                        <h3 class="certificate__title">{{ certificateTitle }}</h3>
+                        <h3 class="certificate__title">{{ 'Код сертифікату: ' + currentCertificate?.value?.id }}</h3>
                         <div v-if="state === routeState.Update">
                             <div class="certificate__canvas-wrapper">
                                 <canvas :class="isLoading ? 'certificate__canvas--hidden' : ''" id="qrcode"></canvas>
@@ -127,7 +130,6 @@
             var amountInput = ref('');
             var password = ref('');
             var isAccess = ref(false);
-            var certificateTitle = computed(() => state.value === Routes.Create ? 'Створити новий сертифікат' : 'Номер сертифікату: ' + currentCertificate?.value?.id);
 
             var changeState = function (newState, id) {
                 // зануляємо поточні значення
@@ -195,7 +197,6 @@
                 amountInput,
                 password,
                 isAccess,
-                certificateTitle,
 
                 // methods
                 createCertificate,
