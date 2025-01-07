@@ -1,4 +1,6 @@
 var sendRequest = (method, url, data = null, repeatReqCallback = () => {}) => {
+    IsLoading.value = true;
+
     const options = {
         method,
         headers: {
@@ -14,29 +16,30 @@ var sendRequest = (method, url, data = null, repeatReqCallback = () => {}) => {
 
     // Якщо є дані для відправки (наприклад, при POST чи PUT)
     if (data) {
-        options.body = JSON.stringify(data);  // Перетворюємо об'єкт в JSON
+        options.body = JSON.stringify(data);
     }
 
     // Виконуємо запит
     return fetch(url, options)
         .then(async (response) => {
+            IsLoading.value = false;
+
             const responseBody = await response.json().catch(() => ({})); // Уникаємо помилок, якщо JSON порожній
             if (!response.ok) { // TODO зробити нормальну систему оновлення токенів
-                if ((response.status === 401 && responseBody.message !== 'Access token is missing')
-                    || responseBody.message === 'Invalid or expired refresh token'
-                    || responseBody.message === 'Refresh token is missing'
-                ) {
+                var status = response.status;
+
+                if (status === 403) {
                     ChangeState(Routes.Login);
-                } else if (response.status === 403 || responseBody.message !== 'Access token is missing') {
+                } else if (status === 401) {
                     RefreshToken(repeatReqCallback);
                 }
-                throw new Error(`Error: ${response.status}`);
+                throw new Error(`Error: ${status}`);
             }
-            return responseBody; // Повертаємо тіло відповіді, якщо все ок
+            return responseBody;
         })
         .catch((error) => {
             console.error(error);
-            throw error; // Передаємо помилку далі
+            throw error;
         });
 }
 
@@ -53,11 +56,18 @@ var DoLogin = function (password) {
 
 
 var RefreshToken = function (callbackRepeatRequest) {
+    if (!IsAccess.value) {
+        ChangeState(Routes.Login)
+        throw new Error('Doesn`t have access token')
+    }
+
     sendRequest('POST', refreshTokenUrl, {}).then((res) => {
         if (res) {
             IsAccess.value = !!res.accessToken;
             localStorage.setItem('accessToken', res.accessToken)
             callbackRepeatRequest()
+        } else {
+            ChangeState(Routes.Login)
         }
     })
 }

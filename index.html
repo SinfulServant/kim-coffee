@@ -18,7 +18,12 @@
 <script src="frontend/helpers/env.js"></script>
 <script src="frontend/helpers/generate-qr-code.js"></script>
 <script src="frontend/helpers/send-request.js"></script>
-<script>var ChangeState; var IsAccess;</script>
+<script>
+    // GLOBAL VARIABLES
+    var ChangeState;
+    var IsAccess;
+    var IsLoading;
+</script>
 <div id="app">
     <div class="main-container" :class="state === routeState.Certificate ? 'main-container--certificate-showing' : ''">
         <header v-if="state !== routeState.Certificate">
@@ -30,14 +35,14 @@
 
         <div class="certificate" v-if="state === routeState.Certificate">
             <div v-if="isLoading" class="loader"></div>
-            <div class="certificate__certificate" :class="isLoading ? 'certificate__canvas--hidden' : ''">
+            <div class="certificate__certificate" :class="isLoading ? 'element-hidden' : ''">
                 <p class="certificate__description">На рахунку вашого сертифіката знаходиться </br>{{currentCertificate?.amount}} гривень :)</p>
                 <canvas id="qrcode"></canvas>
                 <button @click="changeState(routeState.Update, currentCertificate.id)" v-if="isAccess">Редагувати сертифікат</button>
             </div>
         </div>
 
-        <div class="main-content" v-if="state !== routeState.Certificate">
+        <div class="secure-content" v-if="state !== routeState.Certificate">
             <div class="login__wrapper" v-if="state === routeState.Login">
                 <p>Введіть пароль</p>
                 <input type="text" v-model="password">
@@ -47,7 +52,7 @@
                 <div class="certificates" v-if="state === routeState.AllCertificates">
                     <h3>Активні сертифікати</h3>
                     <div class="certificates__certificates">
-                        <div v-if="!allCertificates" class="loader"></div>
+                        <div v-if="isLoading" class="loader"></div>
                         <div v-else class="certificates__certificate" v-for="certificate of allCertificates">
                             <div class="certificates__certificate-description">
                                 <h4>{{ 'Номер сертифікату: ' + certificate.id }}</h4>
@@ -65,8 +70,8 @@
                     </div>
                 </div>
 
-                <div class="certificate-update" v-if="state !== routeState.Certificate && state !== routeState.AllCertificates">
-                    <div v-if="!currentCertificate?.id && state !== routeState.Create" class="loader"></div>
+                <div class="certificate-update" v-if="state === routeState.Update">
+                    <div v-if="isLoading" class="loader"></div>
                     <div :class="currentCertificate?.id ? '' : 'element-hidden'">
                         <h3 class="certificate__title">{{ certificateTitle }}</h3>
                         <div v-if="state === routeState.Update">
@@ -81,22 +86,18 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="certificate__create" v-if="state === routeState.Create">
-                        <div class="certificate__canvas-wrapper">
-                            <div v-if="isLoading" class="loader"></div>
-                            <canvas :class="isLoading ? 'certificate__canvas--hidden' : ''" id="qrcode"></canvas>
-                        </div>
-                        <div class="certificate__create-action">
-                            <input class="certificate__amount-input" v-model="amountInput" type="text"
-                                   placeholder="Введить баланс (грн)">
-                            <button @click="createCertificate()" :disabled="!amountInput.length">Сгенерувати QR-код
-                            </button>
-                        </div>
+                <div class="certificate__create" v-if="state === routeState.Create">
+                    <div class="certificate__canvas-wrapper">
+                        <div v-if="isLoading" class="loader"></div>
+                        <canvas :class="isLoading ? 'certificate__canvas--hidden' : ''" id="qrcode"></canvas>
                     </div>
-
-                    <div v-if="state === routeState.NotFound">
-                        Error 404
+                    <div class="certificate__create-action">
+                        <input class="certificate__amount-input" v-model="amountInput" type="text"
+                               placeholder="Введить баланс (грн)">
+                        <button @click="createCertificate()" :disabled="!amountInput.length">Сгенерувати QR-код
+                        </button>
                     </div>
                 </div>
             </div>
@@ -109,12 +110,16 @@
 
     createApp({
         setup() {
+            // readonly
             var routeState = ref(Routes);
-            var deleteCertificate = (id) => DeleteCertificate(id, allCertificates);
+
+            // methods
+            var doLogin = () => DoLogin(password.value)
             var createCertificate = () => CreateCertificate({isLoading, amountInput});
             var updateCertificate = () => UpdateCertificate(currentCertificate.value.id, amountInput)
-            var doLogin = () => DoLogin(password.value)
+            var deleteCertificate = (id) => DeleteCertificate(id, allCertificates);
 
+            // variables
             var isLoading = ref(false);
             var state = ref(getHrefInfo().route);
             var allCertificates = ref(null);
@@ -131,10 +136,6 @@
 
                 var baseUrl = getHrefInfo().baseUrl
                 var newUrl = `${baseUrl}/${newState}${id ? `?id=${id}` : ''}`
-
-                if (!isAccess.value && (state.value !== Routes.Certificate || state.value !== Routes.Login)) {
-                    newState = Routes.NotFound;
-                }
 
                 window.history.pushState({}, '', newUrl)
                 state.value = newState
@@ -156,8 +157,6 @@
                             isLoading.value = false;
                         });
                         break;
-                    case Routes.NotFound:
-                        break;
                 }
             }
 
@@ -166,37 +165,44 @@
                 ChangeState = changeState;
                 isAccess.value = !!localStorage.getItem('accessToken')
                 IsAccess = isAccess;
+                IsLoading = isLoading;
 
                 // local variables
-                state.value = getHrefInfo().route;
+                var { isRouteEmpty, route } = getHrefInfo();
+                state.value = route;
 
                 // Отримуємо необхідні дані
-                if (state.value === Routes.AllCertificates) {
+                // Переходимо та сторінку всіх сертифікатів, якщо це явно вказано,
+                // або якщо це url не визначено, але при цьому є accessToken
+                if (isRouteEmpty && isAccess || (state.value === Routes.AllCertificates)) {
                     GetAllCertificates(allCertificates)
                 } else if (state.value === Routes.Update || state.value === Routes.Certificate) {
-                    isLoading.value = true;
                     GetCertificate(currentCertificate, amountInput, () => {
-                        isLoading.value = false;
                         generateQrCode(currentCertificate.value.id);
                     })
                 }
             })
 
             return {
-                isLoading,
+                // readonly
                 routeState,
+
+                // variables
+                isLoading,
                 state,
-                amountInput,
-                certificateTitle,
-                createCertificate,
                 allCertificates,
+                currentCertificate,
+                amountInput,
+                password,
+                isAccess,
+                certificateTitle,
+
+                // methods
+                createCertificate,
                 deleteCertificate,
                 changeState,
-                currentCertificate,
                 updateCertificate,
-                password,
                 doLogin,
-                isAccess,
             }
         }
 

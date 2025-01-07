@@ -4,7 +4,6 @@ var Routes = {
     'Create': 'create',
     'Update': 'update',
     'Login': 'login',
-    'NotFound': 'not-found'
 }
 
 var getHrefInfo = function () {
@@ -25,7 +24,8 @@ var getHrefInfo = function () {
     return {
         baseUrl,
         route,
-        id
+        id,
+        isRouteEmpty: route === '',
     };
 };
 

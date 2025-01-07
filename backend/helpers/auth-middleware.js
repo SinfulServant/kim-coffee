@@ -13,7 +13,7 @@ function authenticateAccessToken(req, res, next) {
     // Верифікуємо токен
     jwt.verify(token, ACCESS_SECRET_KEY, (err, decoded) => {
         if (err) {
-            return res.status(403).json({ message: 'Invalid or expired access token' });
+            return res.status(401).json({ message: 'Invalid or expired access token' });
         }
 
         // Якщо все ок, додаємо payload токена до запиту
