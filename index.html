@@ -51,7 +51,7 @@
             <div v-else>
                 <div class="certificates" v-if="state === routeState.AllCertificates">
                     <div v-if="isLoading" class="loader"></div>
-                    <div>
+                    <div v-else>
                         <h3>Активні сертифікати</h3>
                         <div class="certificates__certificates">
                             <div class="certificates__certificate" v-for="certificate of allCertificates">
