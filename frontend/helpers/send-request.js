@@ -79,7 +79,7 @@ var GetAllCertificates = function (allCertificates) {
     })
 }
 
-var GetCertificate = function (currentCertificate, amountInput, callback) {
+var GetCertificate = function (currentCertificate, amountInput, callback = () => {}) {
     sendRequest('GET', getCertificateUrl + getHrefInfo().id, null, () => GetCertificate(currentCertificate, amountInput)).then((res) => {
         currentCertificate.value = res;
         amountInput.value = res.amount;

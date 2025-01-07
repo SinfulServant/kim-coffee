@@ -54,8 +54,7 @@
                     <div>
                         <h3>Активні сертифікати</h3>
                         <div class="certificates__certificates">
-                            <div v-if="isLoading" class="loader"></div>
-                            <div v-else class="certificates__certificate" v-for="certificate of allCertificates">
+                            <div class="certificates__certificate" v-for="certificate of allCertificates">
                                 <div class="certificates__certificate-description">
                                     <h4>{{'Код сертифікату: ' + certificate.id }}</h4>
                                     <p>Сума: {{ certificate.amount }}</p>
@@ -76,7 +75,7 @@
                 <div class="certificate-update" v-if="state === routeState.Update">
                     <div v-if="isLoading" class="loader"></div>
                     <div :class="currentCertificate?.id ? '' : 'element-hidden'">
-                        <h3 class="certificate__title">{{ 'Код сертифікату: ' + currentCertificate?.value?.id }}</h3>
+                        <h3 class="certificate__title">{{ 'Код сертифікату: ' + currentCertificate?.id }}</h3>
                         <div v-if="state === routeState.Update">
                             <div class="certificate__canvas-wrapper">
                                 <canvas :class="isLoading ? 'certificate__canvas--hidden' : ''" id="qrcode"></canvas>
@@ -109,7 +108,7 @@
 </div>
 
 <script>
-    var {createApp, ref, onMounted, computed} = Vue
+    var {createApp, ref, onMounted} = Vue
 
     createApp({
         setup() {
@@ -147,17 +146,11 @@
                         GetAllCertificates(allCertificates);
                         break;
                     case Routes.Update:
-                        isLoading.value = true
-                        GetCertificate(currentCertificate, amountInput, () => {
-                            isLoading.value = false;
-                        })
+                        GetCertificate(currentCertificate, amountInput)
                         generateQrCode(id);
                         break;
                     case Routes.Certificate:
-                        isLoading.value = true
-                        GetCertificate(currentCertificate, amountInput, () => {
-                            isLoading.value = false;
-                        });
+                        GetCertificate(currentCertificate, amountInput);
                         break;
                 }
             }
