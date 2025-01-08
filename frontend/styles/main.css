@@ -10,6 +10,13 @@
     width: 200px !important;
 }
 
+@media (max-width: 1024px) {
+    #qrcode  {
+        height: 30vw !important;
+        width: 30vw !important;
+    }
+}
+
 .main-container {
     display: flex;
     align-items: center;
@@ -213,6 +220,13 @@ input.certificate__amount-input {
     background-size: cover;
 }
 
+@media (max-width: 1024px) {
+    .certificate {
+        height: 100dvh;
+        width: 100dvw;
+    }
+}
+
 @media (max-width: 600px) {
     .certificate {
         height: 100dvh;
@@ -242,6 +256,18 @@ input.certificate__amount-input {
     font-family: "Lobster", serif;
     font-size: 24px;
     text-align: center;
+}
+
+@media (max-width: 1024px) {
+    .certificate__description {
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 600px) {
+    .certificate__description {
+        font-size: 24px;
+    }
 }
 
 .certificate #qrcode {
