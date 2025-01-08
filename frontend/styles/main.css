@@ -199,17 +199,24 @@ input.certificate__amount-input {
 
 /* Public certificate */
 .certificate {
-    background-image: url("./../assets/certificate.webp");
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    height: 100%;
-    width: 100%;
+
+    height: 100vh;
+    width: 550px;
+
+    background-image: url("./../assets/certificate.webp");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+}
+
+@media (max-width: 600px) {
+    .certificate {
+        width: 100vw;
+    }
 }
 
 .certificate__certificate {

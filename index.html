@@ -40,8 +40,8 @@
                 <div class="certificate__description-wrapper">
                     <p class="certificate__description">На рахунку сертифіката </br>{{currentCertificate?.amount}} гривень :)</p>
                 </div>
-                <canvas id="qrcode"></canvas>
                 <button @click="changeState(routeState.Update, currentCertificate.id)" v-if="isAccess">Редагувати сертифікат</button>
+                <canvas id="qrcode"></canvas>
             </div>
         </div>
 
