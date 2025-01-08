@@ -3,12 +3,10 @@ const generateQrCode = (id) => {
     // Через таймаут, щоб елемент з QR кодом встиг з'явитися
     setTimeout(() => {
         const url = `${baseUrl}/certificate?id=${id}`
-        console.log('QR url: ', url);
 
         const canvas = document.getElementById('qrcode');
-        QRCode.toCanvas(canvas, url, (error) => {
+        QRCode.toCanvas(canvas, url, { color: { light: '#fdfce3' }  }, (error) => {
             if (error) console.error('QR Code Error:', error);
-            else console.log('QR Code Generated!');
         });
     })
 };
