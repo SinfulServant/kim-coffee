@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vue App</title>
+    <title>Kim Coffee</title>
+    <link rel="icon" href="frontend/assets/kim-coffee-logo.ico" type="image/svg+xml">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,7 +37,9 @@
         <div class="certificate" v-if="state === routeState.Certificate">
             <div v-if="isLoading" class="loader"></div>
             <div class="certificate__certificate" :class="isLoading ? 'element-hidden' : ''">
-                <p class="certificate__description">На рахунку вашого сертифіката знаходиться </br>{{currentCertificate?.amount}} гривень :)</p>
+                <div class="certificate__description-wrapper">
+                    <p class="certificate__description">На рахунку сертифіката </br>{{currentCertificate?.amount}} гривень :)</p>
+                </div>
                 <canvas id="qrcode"></canvas>
                 <button @click="changeState(routeState.Update, currentCertificate.id)" v-if="isAccess">Редагувати сертифікат</button>
             </div>
@@ -52,11 +55,13 @@
                 <div class="certificates" v-if="state === routeState.AllCertificates">
                     <div v-if="isLoading" class="loader"></div>
                     <div v-else>
-                        <h3>Активні сертифікати</h3>
+                        <h3 class="certificates__title">Активні сертифікати</h3>
                         <div class="certificates__certificates">
                             <div class="certificates__certificate" v-for="certificate of allCertificates">
                                 <div class="certificates__certificate-description">
-                                    <h4>{{'Код сертифікату: ' + certificate.id }}</h4>
+                                    <h4>Код сертифіката:</h4>
+                                    <p>{{ certificate.id }}</p>
+                                    <hr>
                                     <p>Сума: {{ certificate.amount }}</p>
                                 </div>
                                 <div class="certificates__certificate-actions">
@@ -158,18 +163,21 @@
             onMounted(() => {
                 // setting global variables
                 ChangeState = changeState;
-                isAccess.value = !!localStorage.getItem('accessToken')
                 IsAccess = isAccess;
                 IsLoading = isLoading;
 
                 // local variables
                 var { isRouteEmpty, route } = getHrefInfo();
                 state.value = route;
+                isAccess.value = !!localStorage.getItem('accessToken')
 
                 // Отримуємо необхідні дані
                 // Переходимо та сторінку всіх сертифікатів, якщо це явно вказано,
                 // або якщо це url не визначено, але при цьому є accessToken
-                if (isRouteEmpty && isAccess || (state.value === Routes.AllCertificates)) {
+                if (isRouteEmpty && isAccess.value) {
+                    changeState(Routes.AllCertificates);
+                    GetAllCertificates(allCertificates);
+                } else if (state.value === Routes.AllCertificates) {
                     GetAllCertificates(allCertificates)
                 } else if (state.value === Routes.Update || state.value === Routes.Certificate) {
                     GetCertificate(currentCertificate, amountInput, () => {
