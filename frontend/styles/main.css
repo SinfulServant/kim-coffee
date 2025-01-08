@@ -210,12 +210,12 @@ input.certificate__amount-input {
     background-image: url("./../assets/certificate.webp");
     background-repeat: no-repeat;
     background-position: center;
-    background-size: cover;
 }
 
 @media (max-width: 600px) {
     .certificate {
         width: 100dvw;
+        background-size: 100dvw;
     }
 }
 
