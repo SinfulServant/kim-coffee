@@ -24,18 +24,6 @@
     var ChangeState;
     var IsAccess;
     var IsLoading;
-
-    function adjustViewportHeight() {
-        const vh = window.innerHeight * 0.01; // 1% від видимої висоти
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
-    }
-
-    // Викликати при завантаженні
-    adjustViewportHeight();
-
-    // Додатково слухати зміну розміру вікна
-    window.addEventListener('resize', adjustViewportHeight);
-
 </script>
 <div id="app">
     <div class="main-container" :class="state === routeState.Certificate ? 'main-container--certificate-showing' : ''">
@@ -221,6 +209,9 @@
         }
 
     }).mount('#app')
+
+    const vh = window.innerHeight * 0.01; // 1% від видимої висоти
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
 </script>
 </body>
 </html>
