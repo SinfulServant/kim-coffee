@@ -204,7 +204,7 @@ input.certificate__amount-input {
     align-items: center;
     flex-direction: column;
 
-    height: 100vh;
+    height: 100dvh;
     width: 550px;
 
     background-image: url("./../assets/certificate.webp");
@@ -215,7 +215,7 @@ input.certificate__amount-input {
 
 @media (max-width: 600px) {
     .certificate {
-        width: 100vw;
+        width: 100dvw;
     }
 }
 
