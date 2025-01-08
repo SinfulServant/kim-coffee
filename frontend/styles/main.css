@@ -16,7 +16,7 @@
     flex-direction: column;
     background: antiquewhite;
     width: 1200px;
-    min-height: 100vh;
+    min-height: 100dvh;
     overflow: hidden;
 }
 
@@ -30,7 +30,7 @@
 header {
     display: flex;
     justify-content: space-between;
-    height: 10vh;
+    height: 10dvh;
     width: 100%;
     padding: 30px;
 }
@@ -59,7 +59,7 @@ nav p:hover {
 }
 
 .secure-content {
-    height: 90vh;
+    height: 90dvh;
     width: 100%;
     padding: 20px 10px;
 }
@@ -226,7 +226,7 @@ input.certificate__amount-input {
     align-items: center;
     height: 100%;
     width: 100%;
-    padding: 10vh 0;
+    padding: 10dvh 0;
 }
 
 .certificate__description-wrapper {
