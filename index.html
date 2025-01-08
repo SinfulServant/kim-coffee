@@ -230,7 +230,14 @@
         });
     });
 
-    setTimeout(() => document.body.offsetHeight, 5000)
+    setTimeout(() => {
+        adjustViewportHeight();
+
+        document.body.style.display = 'none';
+        document.body.offsetHeight;
+        document.body.style.display = '';
+        }, 5000
+    )
 </script>
 </body>
 </html>
