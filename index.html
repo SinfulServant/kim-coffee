@@ -215,10 +215,16 @@
 
     }).mount('#app')
 
-    setTimeout(() => {
+    var adjustViewportHeight = function () {
         const vh = window.innerHeight * 0.01; // 1% від видимої висоти
         document.documentElement.style.setProperty('--vh', `${vh}px`);
-    })
+    }
+
+    window.addEventListener('load', () => {
+        requestAnimationFrame(() => {
+            adjustViewportHeight();
+        });
+    });
 </script>
 </body>
 </html>
