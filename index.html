@@ -3,6 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=no">
+
     <title>Kim Coffee</title>
     <link rel="icon" href="frontend/assets/kim-coffee-logo.ico" type="image/svg+xml">
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -210,8 +215,10 @@
 
     }).mount('#app')
 
-    const vh = window.innerHeight * 0.01; // 1% від видимої висоти
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
+    setTimeout(() => {
+        const vh = window.innerHeight * 0.01; // 1% від видимої висоти
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    })
 </script>
 </body>
 </html>
