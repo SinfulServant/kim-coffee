@@ -35,6 +35,10 @@ app.use(validateRequest);
 app.post('/login', login);
 app.post('/refresh', refresh);
 
+app.get('/monitor', (req, res) => {
+    console.log('Monitoring...');
+})
+
 // Ендпоінти для роботи з сертифікатами
 app.get('/certificate/all', authenticateAccessToken, getAllCertificates);
 app.get('/certificate/:id', getCertificateById);
