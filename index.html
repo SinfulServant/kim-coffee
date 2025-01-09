@@ -88,7 +88,7 @@
                         <h3 class="certificate__title">{{ 'Код сертифікату: ' + currentCertificate?.id }}</h3>
                         <div v-if="state === routeState.Update">
                             <div class="certificate__canvas-wrapper">
-                                <canvas :class="isLoading ? 'certificate__canvas--hidden' : ''" id="qrcode"></canvas>
+                                <canvas @click="downloadQrcode" :class="isLoading ? 'certificate__canvas--hidden' : ''" id="qrcode"></canvas>
                             </div>
                             <div class="certificate__create-action">
                                 <p>Поточний баланс сертифіката</p>
@@ -103,7 +103,7 @@
                 <div class="certificate__create" v-if="state === routeState.Create">
                     <div class="certificate__canvas-wrapper">
                         <div v-if="isLoading" class="loader"></div>
-                        <canvas :class="isLoading ? 'certificate__canvas--hidden' : ''" id="qrcode"></canvas>
+                        <canvas @click="downloadQrcode" :class="isLoading ? 'certificate__canvas--hidden' : ''" id="qrcode"></canvas>
                     </div>
                     <div class="certificate__create-action">
                         <input class="certificate__amount-input" v-model="amountInput" type="text"
@@ -127,7 +127,7 @@
 
             // methods
             var doLogin = () => DoLogin(password.value)
-            var createCertificate = () => CreateCertificate({isLoading, amountInput});
+            var createCertificate = () => CreateCertificate({amountInput, qrCodeUrl});
             var updateCertificate = () => UpdateCertificate(currentCertificate.value.id, amountInput)
             var deleteCertificate = (id) => DeleteCertificate(id, allCertificates);
 
@@ -139,11 +139,41 @@
             var amountInput = ref('');
             var password = ref('');
             var isAccess = ref(false);
+            var qrCodeUrl = ref('');
+
+            onMounted(() => {
+                // setting global variables
+                ChangeState = changeState;
+                IsAccess = isAccess;
+                IsLoading = isLoading;
+
+                // local variables
+                var { isRouteEmpty, route, id } = getHrefInfo();
+                state.value = route;
+                isAccess.value = !!localStorage.getItem('accessToken')
+                qrCodeUrl.value = getQrCodeUrl(id);
+
+                // Отримуємо необхідні дані
+                // Переходимо та сторінку всіх сертифікатів, якщо це явно вказано,
+                // або якщо це url не визначено, але при цьому є accessToken
+                if (isRouteEmpty && isAccess.value) {
+                    changeState(Routes.AllCertificates);
+                    GetAllCertificates(allCertificates);
+                } else if (state.value === Routes.AllCertificates) {
+                    GetAllCertificates(allCertificates)
+                } else if (state.value === Routes.Update || state.value === Routes.Certificate) {
+                    GetCertificate(currentCertificate, amountInput, () => {
+                        generateQrCode(currentCertificate.value.id);
+                    })
+                }
+            })
 
             var changeState = function (newState, id) {
                 // зануляємо поточні значення
                 currentCertificate.value = null;
                 amountInput.value = '';
+
+                qrCodeUrl.value = getQrCodeUrl(id);
 
                 var baseUrl = getHrefInfo().baseUrl
                 var newUrl = `${baseUrl}/${newState}${id ? `?id=${id}` : ''}`
@@ -165,31 +195,28 @@
                 }
             }
 
-            onMounted(() => {
-                // setting global variables
-                ChangeState = changeState;
-                IsAccess = isAccess;
-                IsLoading = isLoading;
+            var downloadQrcode = function () {
+                var fileName = `qrcode-kim-coffee-${new Date().toString()}.svg`
 
-                // local variables
-                var { isRouteEmpty, route } = getHrefInfo();
-                state.value = route;
-                isAccess.value = !!localStorage.getItem('accessToken')
+                QRCode.toString(qrCodeUrl.value, { type: 'svg' }, (err, svgString) => {
+                    if (err) {
+                        console.error('Error generating QR code:', err);
+                        return;
+                    }
 
-                // Отримуємо необхідні дані
-                // Переходимо та сторінку всіх сертифікатів, якщо це явно вказано,
-                // або якщо це url не визначено, але при цьому є accessToken
-                if (isRouteEmpty && isAccess.value) {
-                    changeState(Routes.AllCertificates);
-                    GetAllCertificates(allCertificates);
-                } else if (state.value === Routes.AllCertificates) {
-                    GetAllCertificates(allCertificates)
-                } else if (state.value === Routes.Update || state.value === Routes.Certificate) {
-                    GetCertificate(currentCertificate, amountInput, () => {
-                        generateQrCode(currentCertificate.value.id);
-                    })
-                }
-            })
+                    var blob = new Blob([svgString], { type: 'image/svg+xml' });
+
+                    // Створюємо посилання для завантаження
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = fileName;
+
+                    // Імітуємо клік для завантаження
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                })
+            }
 
             return {
                 // readonly
@@ -210,6 +237,7 @@
                 changeState,
                 updateCertificate,
                 doLogin,
+                downloadQrcode,
             }
         }
 

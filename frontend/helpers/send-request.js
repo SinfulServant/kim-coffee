@@ -98,17 +98,18 @@ var UpdateCertificate = function (id, amountInput) {
     })
 }
 
-var CreateCertificate = function ({ amountInput, isLoading }) {
+var CreateCertificate = function ({ amountInput, qrCodeUrl }) {
     var baseUrl = getHrefInfo().baseUrl
 
-    isLoading.value = true;
+    IsLoading.value = true;
     sendRequest('POST', createCertificateUrl, {
         amount: +amountInput.value,
-    }, () => CreateCertificate({ amountInput, isLoading })).then((res) => {
-        isLoading.value = false;
+    }, () => CreateCertificate({ amountInput, qrCodeUrl })).then((res) => {
+        IsLoading.value = false;
         if (res) {
             amountInput.value = '';
-            generateQrCode(`${baseUrl}/update?id=${res.id}`)
+            generateQrCode(`${baseUrl}/update?id=${res.id}`);
+            qrCodeUrl.value = getQrCodeUrl(res.id);
         }
     })
 }
