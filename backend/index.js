@@ -15,6 +15,8 @@ const PORT = process.env.PORT;
 
 const app = express();
 
+app.set('trust proxy', 1); // '1' означає довіру першому проксі-серверу
+
 app.use(limiter);
 
 // Middleware для обробки JSON-запитів
