@@ -1,6 +1,6 @@
-const ORIGIN = process.env.FRONTEND_ORIGIN;
+var ORIGIN = process.env.FRONTEND_ORIGIN;
 
-const corsConfig = {
+var corsConfig = {
     origin: ORIGIN,
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',

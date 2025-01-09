@@ -1,8 +1,8 @@
-const pool = require("../helpers/db");
+var pool = require("../helpers/db");
 
-const getAllCertificates = async function (req, res) {
+var getAllCertificates = async function (req, res) {
     try {
-        const result = await pool.query('SELECT * FROM certificate');
+        var result = await pool.query('SELECT * FROM certificate');
         res.json(result.rows);
     } catch (err) {
         console.error(err.message);
@@ -10,11 +10,11 @@ const getAllCertificates = async function (req, res) {
     }
 }
 
-const getCertificateById = async function(req, res) {
-    const { id } = req.params;
+var getCertificateById = async function(req, res) {
+    var { id } = req.params;
 
     try {
-        const result = await pool.query('SELECT * FROM certificate WHERE id = $1', [id]);
+        var result = await pool.query('SELECT * FROM certificate WHERE id = $1', [id]);
 
         if (result.rows.length === 0) {
             return res.status(404).send('Certificate not found');
@@ -27,14 +27,14 @@ const getCertificateById = async function(req, res) {
     }
 }
 
-const createNewCertificate = async function (req, res) {
+var createNewCertificate = async function (req, res) {
     try {
-        const nanoid = (await import('nanoid')).nanoid;
+        var nanoid = (await import('nanoid')).nanoid;
 
-        const amount = req.body.amount;
-        const id = nanoid(10);
+        var amount = req.body.amount;
+        var id = nanoid(10);
 
-        const result = await pool.query(
+        var result = await pool.query(
             `INSERT INTO certificate (id, amount)
              VALUES ($1, $2) RETURNING *`,
             [id, amount]
@@ -46,12 +46,12 @@ const createNewCertificate = async function (req, res) {
     }
 }
 
-const updateCertificate = async function(req, res) {
+var updateCertificate = async function(req, res) {
     try {
-        const id = req.params.id;
-        const amount = req.body.amount;
+        var id = req.params.id;
+        var amount = req.body.amount;
 
-        const result = await pool.query(
+        var result = await pool.query(
             `UPDATE certificate
              SET amount = $2
              WHERE id = $1
@@ -70,11 +70,11 @@ const updateCertificate = async function(req, res) {
     }
 }
 
-const deleteCertificate = async function(req, res) {
+var deleteCertificate = async function(req, res) {
     try {
-        const { id } = req.params;
+        var { id } = req.params;
 
-        const result = await pool.query(
+        var result = await pool.query(
             'DELETE FROM certificate WHERE id = $1 RETURNING *',
             [id]
         );

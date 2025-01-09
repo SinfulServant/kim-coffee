@@ -1,19 +1,19 @@
 // npm imports
-const express = require('express');
-const cookieParser = require('cookie-parser');
-const cors = require('cors');
+var express = require('express');
+var cookieParser = require('cookie-parser');
+var cors = require('cors');
 
 // local imports
-const { login, refresh } = require("./endpoints/auth-endpoints");
-const validateRequest = require('./helpers/validate')
-const limiter = require("./helpers/limiter");
-const authenticateAccessToken = require("./helpers/auth-middleware");
-const corsConfig = require("./helpers/cors.config");
-const { getAllCertificates, getCertificateById, createNewCertificate, updateCertificate, deleteCertificate} = require("./endpoints/certificate-endpoints");
+var { login, refresh } = require("./endpoints/auth-endpoints");
+var validateRequest = require('./helpers/validate')
+var limiter = require("./helpers/limiter");
+var authenticateAccessToken = require("./helpers/auth-middleware");
+var corsConfig = require("./helpers/cors.config");
+var { getAllCertificates, getCertificateById, createNewCertificate, updateCertificate, deleteCertificate} = require("./endpoints/certificate-endpoints");
 
-const PORT = process.env.PORT;
+var PORT = process.env.PORT;
 
-const app = express();
+var app = express();
 
 app.set('trust proxy', 1); // '1' означає довіру першому проксі-серверу
 

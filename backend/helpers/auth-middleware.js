@@ -1,10 +1,10 @@
-const jwt = require('jsonwebtoken');
+var jwt = require('jsonwebtoken');
 
-const ACCESS_SECRET_KEY = process.env.ACCESS_SECRET_KEY;
+var ACCESS_SECRET_KEY = process.env.ACCESS_SECRET_KEY;
 
 function authenticateAccessToken(req, res, next) {
-    const authHeader = req.headers['authorization']; // Токен передається в заголовку
-    const token = authHeader && authHeader.split(' ')[1]; // Витягуємо токен із "Bearer TOKEN"
+    var authHeader = req.headers['authorization']; // Токен передається в заголовку
+    var token = authHeader && authHeader.split(' ')[1]; // Витягуємо токен із "Bearer TOKEN"
 
     if (!token || token === 'null') {
         return res.status(401).json({ message: 'Access token is missing' });

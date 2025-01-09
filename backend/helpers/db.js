@@ -1,9 +1,9 @@
-const { Pool } = require('pg');
+var { Pool } = require('pg');
 
 require('dotenv').config();
 
 // Створюємо пул підключень
-const pool = new Pool({
+var pool = new Pool({
     connectionString: process.env.DB_CONNECTION,
     idleTimeoutMillis: 30000,
     keepAlive: true,
