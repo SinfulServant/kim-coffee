@@ -43,7 +43,7 @@
             <div v-if="isLoading" class="loader"></div>
             <div class="certificate__certificate" :class="isLoading ? 'element-hidden' : ''">
                 <div class="certificate__description-wrapper">
-                    <p class="certificate__description">На рахунку сертифіката <br>{{currentCertificate?.amount}}
+                    <p class="certificate__description">На рахунку сертифіката {{currentCertificate?.name}} <br>{{currentCertificate?.amount}}
                         гривень :)</p>
                 </div>
                 <button @click="changeState(routeState.Update, currentCertificate.id)" v-if="isAccess">Редагувати
@@ -56,16 +56,23 @@
         <div class="secure-content" v-if="state !== routeState.Certificate">
             <div class="login__wrapper" v-if="state === routeState.Login">
                 <p>Введіть пароль</p>
-                <input type="text" v-model="password">
+                <label>
+                    <input type="text" v-model="password">
+                </label>
                 <button @click="doLogin">Авторизуватися</button>
             </div>
             <div style="height: 100%" v-else>
                 <div class="certificates" v-if="state === routeState.AllCertificates">
                     <div v-if="isLoading" class="loader"></div>
                     <div v-else>
-                        <h3 class="certificates__title">Активні сертифікати</h3>
+                        <div class="certificates__header">
+                            <h3 class="certificates__title">Активні сертифікати</h3>
+                            <label>
+                                <input v-model="searchInput" type="text" placeholder="Почніть вводити назву сертифікату">
+                            </label>
+                        </div>
                         <div class="certificates__certificates">
-                            <div class="certificates__certificate" v-for="certificate of allCertificates">
+                            <div class="certificates__certificate" v-for="certificate of filtredCertificates">
                                 <div class="certificates__certificate-description">
                                     <h4>Назва сертифіката:</h4>
                                     <p>{{ certificate.name }}</p>
@@ -140,7 +147,7 @@
 </div>
 
 <script>
-    var {createApp, ref, onMounted} = Vue
+    var {createApp, ref, onMounted, computed} = Vue
 
     createApp({
         setup() {
@@ -154,13 +161,22 @@
             var deleteCertificate = (id) => DeleteCertificate(id, allCertificates);
 
             // variables
-            var isLoading = ref(false);
-            var state = ref(getHrefInfo().route);
-            var allCertificates = ref(null);
-            var currentCertificate = ref(null);
             var amountInput = ref('');
             var nameInput = ref('');
             var password = ref('');
+            var searchInput = ref('');
+
+            var isLoading = ref(false);
+            var state = ref(getHrefInfo().route);
+            var allCertificates = ref(null);
+            var filteredCertificates = computed(() => {
+                return !searchInput.value
+                    ? allCertificates.value ?? []
+                    : allCertificates.value.filter((c) =>
+                    c.name.toLowerCase().includes(searchInput.value.toLowerCase())
+                );
+            });
+            var currentCertificate = ref(null);
             var isAccess = ref(false);
             var qrCodeUrl = ref('');
 
@@ -259,6 +275,8 @@
                 nameInput,
                 password,
                 isAccess,
+                searchInput,
+                filtredCertificates: filteredCertificates,
 
                 // methods
                 createCertificate,
