@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!--    <meta name="mobile-web-app-capable" content="yes">-->
-<!--    <meta name="apple-mobile-web-app-status-bar-style" content="default">-->
-<!--    <meta name="format-detection" content="telephone=no">-->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="format-detection" content="telephone=no">
 
     <title>Kim Coffee</title>
     <link rel="icon" href="frontend/assets/kim-coffee-logo.ico" type="image/x-icon">
@@ -43,9 +43,12 @@
             <div v-if="isLoading" class="loader"></div>
             <div class="certificate__certificate" :class="isLoading ? 'element-hidden' : ''">
                 <div class="certificate__description-wrapper">
-                    <p class="certificate__description">На рахунку сертифіката </br>{{currentCertificate?.amount}} гривень :)</p>
+                    <p class="certificate__description">На рахунку сертифіката <br>{{currentCertificate?.amount}}
+                        гривень :)</p>
                 </div>
-                <button @click="changeState(routeState.Update, currentCertificate.id)" v-if="isAccess">Редагувати сертифікат</button>
+                <button @click="changeState(routeState.Update, currentCertificate.id)" v-if="isAccess">Редагувати
+                    сертифікат
+                </button>
                 <canvas id="qrcode"></canvas>
             </div>
         </div>
@@ -56,7 +59,7 @@
                 <input type="text" v-model="password">
                 <button @click="doLogin">Авторизуватися</button>
             </div>
-            <div v-else>
+            <div style="height: 100%" v-else>
                 <div class="certificates" v-if="state === routeState.AllCertificates">
                     <div v-if="isLoading" class="loader"></div>
                     <div v-else>
@@ -64,8 +67,8 @@
                         <div class="certificates__certificates">
                             <div class="certificates__certificate" v-for="certificate of allCertificates">
                                 <div class="certificates__certificate-description">
-                                    <h4>Код сертифіката:</h4>
-                                    <p>{{ certificate.id }}</p>
+                                    <h4>Назва сертифіката:</h4>
+                                    <p>{{ certificate.name }}</p>
                                     <hr>
                                     <p>Сума: {{ certificate.amount }}</p>
                                 </div>
@@ -84,32 +87,51 @@
 
                 <div class="certificate-update" v-if="state === routeState.Update">
                     <div v-if="isLoading" class="loader"></div>
-                    <div :class="currentCertificate?.id ? '' : 'element-hidden'">
-                        <h3 class="certificate__title">{{ 'Код сертифікату: ' + currentCertificate?.id }}</h3>
-                        <div v-if="state === routeState.Update">
-                            <div class="certificate__canvas-wrapper">
-                                <canvas @click="downloadQrcode" :class="isLoading ? 'certificate__canvas--hidden' : ''" id="qrcode"></canvas>
-                            </div>
-                            <div class="certificate__create-action">
-                                <p>Поточний баланс сертифіката</p>
+                    <div :class="currentCertificate?.id ? 'certificate-update__container' : 'element-hidden'">
+                        <div class="certificate__canvas-wrapper">
+                            <canvas @click="downloadQrcode" :class="isLoading ? 'certificate__canvas--hidden' : ''"
+                                    id="qrcode"></canvas>
+                        </div>
+                        <div class="certificate__create-action">
+                            <label>
+                                Назва сертифіката
+                                <input class="certificate__amount-input" v-model="nameInput" type="text"
+                                       placeholder="Введить ім'я сертифікату">
+                                <span nameInputError class="ui-error"></span>
+                            </label>
+                            <label>
+                                Поточний баланс сертифіката
                                 <input class="certificate__amount-input" v-model="amountInput" type="text"
                                        placeholder="Введить баланс (грн)">
-                                <button @click="updateCertificate()">Змінити баланс сертифікату</button>
-                            </div>
+                            </label>
+                            <button @click="updateCertificate()">Змінити дані сертифіката</button>
                         </div>
                     </div>
                 </div>
 
                 <div class="certificate__create" v-if="state === routeState.Create">
-                    <div class="certificate__canvas-wrapper">
-                        <div v-if="isLoading" class="loader"></div>
-                        <canvas @click="downloadQrcode" :class="isLoading ? 'certificate__canvas--hidden' : ''" id="qrcode"></canvas>
-                    </div>
-                    <div class="certificate__create-action">
-                        <input class="certificate__amount-input" v-model="amountInput" type="text"
-                               placeholder="Введить баланс (грн)">
-                        <button @click="createCertificate()" :disabled="!amountInput.length">Сгенерувати QR-код
-                        </button>
+                    <div class="certificate-create__container">
+                        <div class="certificate__canvas-wrapper">
+                            <div v-if="isLoading" class="loader"></div>
+                            <canvas @click="downloadQrcode" :class="isLoading ? 'certificate__canvas--hidden' : ''"
+                                    id="qrcode"></canvas>
+                        </div>
+                        <div class="certificate__create-action">
+                            <label>
+                                Назва сертифіката
+                                <input class="certificate__amount-input" v-model="nameInput" type="text"
+                                       placeholder="Введить ім'я сертифікату">
+                                <span nameInputError class="ui-error"></span>
+                            </label>
+                            <label>
+                                Поточний баланс сертифіката
+                                <input class="certificate__amount-input" v-model="amountInput" type="text"
+                                       placeholder="Введить баланс (грн)">
+                            </label>
+                            <button @click="createCertificate()" :disabled="!amountInput.length || !nameInput.length">
+                                Сгенерувати QR-код
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -127,8 +149,8 @@
 
             // methods
             var doLogin = () => DoLogin(password.value)
-            var createCertificate = () => CreateCertificate({amountInput, qrCodeUrl});
-            var updateCertificate = () => UpdateCertificate(currentCertificate.value.id, amountInput)
+            var createCertificate = () => CreateCertificate({amountInput, nameInput, qrCodeUrl});
+            var updateCertificate = () => UpdateCertificate(currentCertificate.value.id, amountInput, nameInput)
             var deleteCertificate = (id) => DeleteCertificate(id, allCertificates);
 
             // variables
@@ -137,6 +159,7 @@
             var allCertificates = ref(null);
             var currentCertificate = ref(null);
             var amountInput = ref('');
+            var nameInput = ref('');
             var password = ref('');
             var isAccess = ref(false);
             var qrCodeUrl = ref('');
@@ -148,7 +171,7 @@
                 IsLoading = isLoading;
 
                 // local variables
-                var { isRouteEmpty, route, id } = getHrefInfo();
+                var {isRouteEmpty, route, id} = getHrefInfo();
                 state.value = route;
                 isAccess.value = !!localStorage.getItem('accessToken')
                 qrCodeUrl.value = getQrCodeUrl(id);
@@ -162,7 +185,7 @@
                 } else if (state.value === Routes.AllCertificates) {
                     GetAllCertificates(allCertificates)
                 } else if (state.value === Routes.Update || state.value === Routes.Certificate) {
-                    GetCertificate(currentCertificate, amountInput, () => {
+                    GetCertificate(currentCertificate, amountInput, nameInput, () => {
                         generateQrCode(currentCertificate.value.id);
                     })
                 }
@@ -172,6 +195,7 @@
                 // зануляємо поточні значення
                 currentCertificate.value = null;
                 amountInput.value = '';
+                nameInput.value = '';
 
                 qrCodeUrl.value = getQrCodeUrl(id);
 
@@ -186,25 +210,29 @@
                         GetAllCertificates(allCertificates);
                         break;
                     case Routes.Update:
-                        GetCertificate(currentCertificate, amountInput)
+                        GetCertificate(currentCertificate, amountInput, nameInput)
                         generateQrCode(id);
                         break;
                     case Routes.Certificate:
-                        GetCertificate(currentCertificate, amountInput);
+                        GetCertificate(currentCertificate, amountInput, nameInput);
                         break;
                 }
             }
 
             var downloadQrcode = function () {
-                var fileName = `qrcode-kim-coffee-${new Date().toString()}.svg`
+                if (!confirm('Завантажити svg з qr-кодом?')) {
+                    return;
+                }
 
-                QRCode.toString(qrCodeUrl.value, { type: 'svg' }, (err, svgString) => {
+                var fileName = `qrcode-kim-coffee-${new Date().toString()}.svg` // TODO Переробити назву на name
+
+                QRCode.toString(qrCodeUrl.value, {type: 'svg'}, (err, svgString) => {
                     if (err) {
                         console.error('Error generating QR code:', err);
                         return;
                     }
 
-                    var blob = new Blob([svgString], { type: 'image/svg+xml' });
+                    var blob = new Blob([svgString], {type: 'image/svg+xml'});
 
                     // Створюємо посилання для завантаження
                     const link = document.createElement('a');
@@ -228,6 +256,7 @@
                 allCertificates,
                 currentCertificate,
                 amountInput,
+                nameInput,
                 password,
                 isAccess,
 

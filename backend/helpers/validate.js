@@ -8,10 +8,16 @@ const validateRequest = (req, res, next) => {
     if (req.method === 'POST') {
         const amount = req.body.amount;
         const id = req.params.id;
+        const name = req.params.name;
+
+        if (['/update', '/create'].includes(req.path) && (!name || name !== '')) {
+            return res.status(400).send('Name is required and must be a string');
+        }
 
         if (id) {
-            if (!id || typeof id !== 'string' || id.length !== 10) {
-                return res.status(400).send('Id is required and must be a string with length 10 symbols');
+            var idLength = 24;
+            if (!id || typeof id !== 'string' || id.length !== idLength) {
+                return res.status(400).send(`Id is required and must be a string with length ${idLength} symbols`);
             }
         }
 

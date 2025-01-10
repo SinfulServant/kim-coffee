@@ -32,17 +32,29 @@ var createNewCertificate = async function (req, res) {
         var nanoid = (await import('nanoid')).nanoid;
 
         var amount = req.body.amount;
-        var id = nanoid(10);
+        var id = nanoid(24);
+        var name = req.body.name;
 
         var result = await pool.query(
-            `INSERT INTO certificate (id, amount)
-             VALUES ($1, $2) RETURNING *`,
-            [id, amount]
+            `INSERT INTO certificate (id, amount, name)
+             VALUES ($1, $2, $3) RETURNING *`,
+            [id, amount, name]
         );
         res.json(result.rows[0]);
     } catch (err) {
-        console.error('Message: ', err.message);
-        res.status(500).send('Server error');
+        if (err.code === '23505') {
+            // Обробляємо помилку порушення унікальності
+            res.status(409).json({
+                message: "The name already exists. Please choose a different name.",
+                error: err.detail,
+            });
+        } else {
+            // Інші помилки
+            res.status(500).json({
+                message: "An unexpected error occurred.",
+                error: err.message,
+            });
+        }
     }
 }
 
@@ -50,13 +62,14 @@ var updateCertificate = async function(req, res) {
     try {
         var id = req.params.id;
         var amount = req.body.amount;
+        var name = req.body.name;
 
         var result = await pool.query(
             `UPDATE certificate
-             SET amount = $2
+             SET amount = $2, name = $3
              WHERE id = $1
-             RETURNING *`,
-            [id, amount]
+                 RETURNING *`,
+            [id, amount, name]
         );
 
         if (result.rowCount === 0) {
@@ -65,8 +78,19 @@ var updateCertificate = async function(req, res) {
 
         res.json(result.rows[0]);
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
+        if (err.code === '23505') {
+            // Обробляємо помилку порушення унікальності
+            res.status(409).json({
+                message: "The name already exists. Please choose a different name.",
+                error: err.detail,
+            });
+        } else {
+            // Інші помилки
+            res.status(500).json({
+                message: "An unexpected error occurred.",
+                error: err.message,
+            });
+        }
     }
 }
 

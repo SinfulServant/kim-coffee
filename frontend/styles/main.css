@@ -12,8 +12,8 @@
 
 @media (max-width: 1024px) {
     #qrcode  {
-        height: 30vw !important;
-        width: 30vw !important;
+        height: 35vw !important;
+        width: 35vw !important;
     }
 }
 
@@ -123,6 +123,7 @@ nav p:hover {
 
 .certificates__certificate-actions {
     display: flex;
+    align-items: center;
     gap: 5px;
 }
 
@@ -139,14 +140,20 @@ nav p:hover {
     color: white;
 }
 
-/* Update certificate */
+/* Update & create certificate */
+.certificate-create__container, .certificate-update__container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: space-evenly;
+}
+
 .certificate-update {
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     height: 100%;
-    padding: 20px;
 }
 
 .certificate__canvas-wrapper {
@@ -154,7 +161,7 @@ nav p:hover {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 300px;
+    padding: 40px 0;
 }
 
 .certificate__title {

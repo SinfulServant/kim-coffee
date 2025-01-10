@@ -33,7 +33,7 @@ var sendRequest = (method, url, data = null, repeatReqCallback = () => {}) => {
                 } else if (status === 401) {
                     RefreshToken(repeatReqCallback);
                 }
-                throw new Error(`Error: ${status}`);
+                throw new Error(`Error: ${status}; message: ${responseBody.message}`);
             }
             return responseBody;
         })
@@ -55,7 +55,7 @@ var DoLogin = function (password) {
 }
 
 
-var RefreshToken = function (callbackRepeatRequest) {
+var RefreshToken = function (callbackRepeatRequest = () => {}) {
     if (!IsAccess.value) {
         ChangeState(Routes.Login)
         throw new Error('Doesn`t have access token')
@@ -79,38 +79,48 @@ var GetAllCertificates = function (allCertificates) {
     })
 }
 
-var GetCertificate = function (currentCertificate, amountInput, callback = () => {}) {
-    sendRequest('GET', getCertificateUrl + getHrefInfo().id, null, () => GetCertificate(currentCertificate, amountInput)).then((res) => {
+var GetCertificate = function (currentCertificate, amountInput, nameInput, callback = () => {}) {
+    sendRequest('GET', getCertificateUrl + getHrefInfo().id, null, () => GetCertificate(currentCertificate, amountInput, nameInput)).then((res) => {
         currentCertificate.value = res;
         amountInput.value = res.amount;
+        nameInput.value = res.name;
         callback();
     })
 }
 
-var UpdateCertificate = function (id, amountInput) {
+var UpdateCertificate = function (id, amountInput, nameInput) {
     sendRequest('POST', updateCertificateUrl + id, {
         amount: +amountInput.value,
-    }, () => UpdateCertificate(id, amountInput)).then((res) => {
+        name: nameInput.value,
+    }, () => UpdateCertificate(id, amountInput, nameInput)).then((res) => {
         if (res) {
             alert('Баланс сертифіката зміно')
             amountInput.value = res.amount;
+            nameInput.value = res.name;
         }
+    }).catch((err) => {
+        nameInputValidator(err)
     })
 }
 
-var CreateCertificate = function ({ amountInput, qrCodeUrl }) {
+var CreateCertificate = function ({ amountInput, nameInput, qrCodeUrl }) {
     var baseUrl = getHrefInfo().baseUrl
 
     IsLoading.value = true;
+
     sendRequest('POST', createCertificateUrl, {
         amount: +amountInput.value,
-    }, () => CreateCertificate({ amountInput, qrCodeUrl })).then((res) => {
+        name: nameInput.value,
+    }, () => CreateCertificate({ amountInput, nameInput, qrCodeUrl })).then((res) => {
         IsLoading.value = false;
         if (res) {
             amountInput.value = '';
+            nameInput.value = '';
             generateQrCode(`${baseUrl}/update?id=${res.id}`);
             qrCodeUrl.value = getQrCodeUrl(res.id);
         }
+    }).catch((error) => {
+        nameInputValidator(error)
     })
 }
 
@@ -123,4 +133,16 @@ var DeleteCertificate = function (id, allCertificates) {
             allCertificates.value = allCertificates.value.filter((certificate) => certificate.id !== id)
         }
     )
+}
+
+// validators
+var nameInputValidator = function (error = '') {
+
+    var errorElement = document.querySelector("[nameInputError]")
+
+    if (error.toString().includes('The name already exists. Please choose a different name.')) {
+        errorElement.innerText = 'Сертифікати з таким ім\'ям вже існує';
+    }
+
+    setTimeout(() => errorElement.innerText = '', 5000)
 }

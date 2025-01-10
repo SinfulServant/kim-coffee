@@ -92,3 +92,8 @@ button:disabled {
         transform: rotate(360deg); /* Кінець обертання */
     }
 }
+
+/*  */
+.ui-error {
+    color: red;
+}
