@@ -108,7 +108,7 @@
                             </label>
                             <label>
                                 Поточний баланс сертифіката
-                                <input class="certificate__amount-input" v-model="amountInput" type="text"
+                                <input class="certificate__amount-input" @input="validateAmountInput($event, amountInput)" v-model="amountInput" type="text"
                                        placeholder="Введить баланс (грн)">
                             </label>
                             <button @click="updateCertificate()">Змінити дані сертифіката</button>
@@ -131,8 +131,8 @@
                                 <span nameInputError class="ui-error"></span>
                             </label>
                             <label>
-                                Поточний баланс сертифіката
-                                <input class="certificate__amount-input" v-model="amountInput" type="text"
+                                Баланс сертифіката
+                                <input class="certificate__amount-input" @input="validateAmountInput($event, amountInput) " v-model="amountInput" type="text"
                                        placeholder="Введить баланс (грн)">
                             </label>
                             <button @click="createCertificate()" :disabled="!amountInput.length || !nameInput.length">
@@ -149,7 +149,7 @@
 <script>
     var {createApp, ref, onMounted, computed} = Vue
 
-    createApp({
+    var VUE = createApp({
         setup() {
             // readonly
             var routeState = ref(Routes);
@@ -159,6 +159,7 @@
             var createCertificate = () => CreateCertificate({amountInput, nameInput, qrCodeUrl});
             var updateCertificate = () => UpdateCertificate(currentCertificate.value.id, amountInput, nameInput)
             var deleteCertificate = (id) => DeleteCertificate(id, allCertificates);
+            var validateAmountInput = (event) => amountInput.value = event.target.value.replace(/[^0-9]/g, '');
 
             // variables
             var amountInput = ref('');
@@ -285,6 +286,7 @@
                 updateCertificate,
                 doLogin,
                 downloadQrcode,
+                validateAmountInput,
             }
         }
 

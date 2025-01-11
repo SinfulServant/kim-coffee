@@ -91,7 +91,7 @@ var GetCertificate = function (currentCertificate, amountInput, nameInput, callb
 var UpdateCertificate = function (id, amountInput, nameInput) {
     sendRequest('POST', updateCertificateUrl + id, {
         amount: +amountInput.value,
-        name: nameInput.value,
+        name: nameInput.value.trim(),
     }, () => UpdateCertificate(id, amountInput, nameInput)).then((res) => {
         if (res) {
             alert('Баланс сертифіката зміно')
@@ -110,7 +110,7 @@ var CreateCertificate = function ({ amountInput, nameInput, qrCodeUrl }) {
 
     sendRequest('POST', createCertificateUrl, {
         amount: +amountInput.value,
-        name: nameInput.value,
+        name: nameInput.value.trim(),
     }, () => CreateCertificate({ amountInput, nameInput, qrCodeUrl })).then((res) => {
         IsLoading.value = false;
         if (res) {
