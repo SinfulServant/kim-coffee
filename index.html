@@ -43,13 +43,20 @@
             <div v-if="isLoading" class="loader"></div>
             <div class="certificate__certificate" :class="isLoading ? 'element-hidden' : ''">
                 <div class="certificate__description-wrapper">
-                    <p class="certificate__description">На рахунку сертифіката {{currentCertificate?.name}} <br>{{currentCertificate?.amount}}
-                        гривень :)</p>
+                    <p class="certificate__description">
+                        <span v-if="!!currentCertificate && !!currentCertificate?.name">
+                            На рахунку сертифіката {{currentCertificate?.name}} <br>{{currentCertificate?.amount}} гривень :)
+                        </span>
+                        <span v-else>
+                            Схоже, що сертифікат не було знайдено.<br>
+                            Будь ласка, перевірте правильність qr-коду, або спробуйте пізніше.
+                        </span>
+                    </p>
                 </div>
                 <button @click="changeState(routeState.Update, currentCertificate.id)" v-if="isAccess">Редагувати
                     сертифікат
                 </button>
-                <canvas id="qrcode"></canvas>
+                <canvas v-if="currentCertificate?.name" id="qrcode"></canvas>
             </div>
         </div>
 

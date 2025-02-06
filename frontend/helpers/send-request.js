@@ -18,29 +18,38 @@ var sendRequest = (method, url, data = null, repeatReqCallback = () => {}) => {
     if (data) {
         options.body = JSON.stringify(data);
     }
-
+    try {
     // Виконуємо запит
-    return fetch(url, options)
-        .then(async (response) => {
-            IsLoading.value = false;
+        return fetch(url, options)
+            .then(async (response) => {
+                IsLoading.value = false;
 
-            const responseBody = await response.json().catch(() => ({})); // Уникаємо помилок, якщо JSON порожній
-            if (!response.ok) { // TODO зробити нормальну систему оновлення токенів
-                var status = response.status;
+                const responseBody = await response.json().catch(() => ({})); // Уникаємо помилок, якщо JSON порожній
+                if (!response.ok) {
+                    var status = response.status;
+                    var message = responseBody.message;
 
-                if (status === 403) {
-                    ChangeState(Routes.Login);
-                } else if (status === 401) {
-                    RefreshToken(repeatReqCallback);
+                    if (status === 403) {
+                        ChangeState(Routes.Login);
+                    } else if (status === 401) {
+                        RefreshToken(repeatReqCallback);
+                    }
+                    throw new Error(`{ 
+                    "statusCode": "${status}", 
+                    "message": "${message}"
+                }`);
                 }
-                throw new Error(`Error: ${status}; message: ${responseBody.message}`);
-            }
-            return responseBody;
-        })
-        .catch((error) => {
-            console.error(error);
-            throw error;
-        });
+                return responseBody;
+            })
+            .catch((error) => {
+                IsLoading.value = false;
+                console.log(error)
+                throw error;
+            });
+    } catch (error) {
+        console.log('Catcher')
+        IsLoading.value = false;
+    }
 }
 
 // AUTH
