@@ -1,5 +1,9 @@
+var toggleIsLoading = (isLoading) => {
+    IsLoading.value = isLoading;
+}
+
 var sendRequest = (method, url, data = null, repeatReqCallback = () => {}) => {
-    IsLoading.value = true;
+    toggleIsLoading(true);
 
     const options = {
         method,
@@ -22,7 +26,7 @@ var sendRequest = (method, url, data = null, repeatReqCallback = () => {}) => {
     // Виконуємо запит
         return fetch(url, options)
             .then(async (response) => {
-                IsLoading.value = false;
+                setTimeout(() => toggleIsLoading(false), 100);
 
                 const responseBody = await response.json().catch(() => ({})); // Уникаємо помилок, якщо JSON порожній
                 if (!response.ok) {
@@ -42,13 +46,13 @@ var sendRequest = (method, url, data = null, repeatReqCallback = () => {}) => {
                 return responseBody;
             })
             .catch((error) => {
-                IsLoading.value = false;
+                setTimeout(() => toggleIsLoading(false), 100);
                 console.log(error)
                 throw error;
             });
     } catch (error) {
-        console.log('Catcher')
-        IsLoading.value = false;
+        console.log('Main fetch catcher')
+        setTimeout(() => toggleIsLoading(false), 100);
     }
 }
 
@@ -115,13 +119,13 @@ var UpdateCertificate = function (id, amountInput, nameInput) {
 var CreateCertificate = function ({ amountInput, nameInput, qrCodeUrl }) {
     var baseUrl = getHrefInfo().baseUrl
 
-    IsLoading.value = true;
+    toggleIsLoading(true);
 
     sendRequest('POST', createCertificateUrl, {
         amount: +amountInput.value,
         name: nameInput.value.trim(),
     }, () => CreateCertificate({ amountInput, nameInput, qrCodeUrl })).then((res) => {
-        IsLoading.value = false;
+        toggleIsLoading(false);
         if (res) {
             amountInput.value = '';
             nameInput.value = '';
