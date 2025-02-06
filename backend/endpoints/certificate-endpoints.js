@@ -17,7 +17,7 @@ var getCertificateById = async function(req, res) {
         var result = await pool.query('SELECT * FROM certificate WHERE id = $1', [id]);
 
         if (result.rows.length === 0) {
-            return res.status(404).send('Certificate not found');
+            return res.status(404).send({message: 'Certificate not found'});
         }
 
         res.json(result.rows[0]); // Повертаємо перший знайдений запис
